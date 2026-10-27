@@ -1,0 +1,1 @@
+import type { MetadataRoute } from "next"; export default function sitemap():MetadataRoute.Sitemap{const pages=["","/services","/about","/resources","/contact","/book","/privacy","/terms"];return pages.map((page)=>({url:`https://example.com${page}`,lastModified:new Date()}))}

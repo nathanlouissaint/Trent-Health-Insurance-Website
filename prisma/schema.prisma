@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookingStatus {
+  NOT_STARTED
+  OPENED
+  SCHEDULED
+}
+
+enum CrmStatus {
+  NEW_LEAD
+  CONTACTED
+  CONSULTATION_SCHEDULED
+  CONSULTATION_COMPLETED
+  FOLLOW_UP
+  CLIENT
+}
+
+model Lead {
+  id                     String        @id @default(cuid())
+  fullName               String
+  email                  String
+  phone                  String
+  coverageInterest       String
+  state                  String?
+  preferredContactMethod String
+  bestTimeToContact      String?
+  message                String?
+  consentStatus          Boolean
+  consentText            String
+  consentedAt            DateTime
+  source                 String?
+  utmSource              String?
+  utmMedium              String?
+  utmCampaign            String?
+  submittedAt            DateTime      @default(now())
+  bookingStatus          BookingStatus @default(NOT_STARTED)
+  crmStatus              CrmStatus     @default(NEW_LEAD)
+  ipHash                 String?
+  userAgent              String?
+}
