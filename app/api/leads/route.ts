@@ -52,7 +52,7 @@ function getCampaignData(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "Lead capture is temporarily unavailable. Please contact the advisor directly." }, { status: 503 });
+  if (!process.env.DATABASE_URL) return NextResponse.json({ error: "Lead capture is temporarily unavailable. Please contact TMF Insurance Group directly." }, { status: 503 });
   const ip = getClientIp(request);
   if (isRateLimited(ip)) return NextResponse.json({ error: "Please wait a moment before trying again." }, { status: 429 });
   const parsed = leadSchema.safeParse(await request.json().catch(() => null));
@@ -60,20 +60,20 @@ export async function POST(request: NextRequest) {
   if (parsed.data.website) return new NextResponse(null, { status: 204 });
 
   const data = parsed.data;
-  const consentText = "I agree that [Advisor Name] may contact me by my selected method about my coverage inquiry.";
+  const consentText = "I agree that TMF Insurance Group may contact me by my selected method about my coverage inquiry.";
   try {
     const lead = await prisma.lead.create({ data: { fullName: data.fullName, email: data.email, phone: data.phone, coverageInterest: data.coverageInterest, preferredContactMethod: data.preferredContactMethod, state: data.state || null, bestTimeToContact: data.bestTimeToContact || null, message: data.message || null, consentStatus: true, consentText, consentedAt: new Date(), ...getCampaignData(request), userAgent: request.headers.get("user-agent") || null, ipHash: createHash("sha256").update(ip).digest("hex") } });
     if (process.env.RESEND_API_KEY && process.env.NOTIFICATION_EMAIL) {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const delivery = await resend.emails.send({ from: process.env.EMAIL_FROM || "Leads <onboarding@resend.dev>", to: process.env.NOTIFICATION_EMAIL, subject: `New coverage inquiry — ${data.fullName}`, text: `${data.fullName} submitted a ${data.coverageInterest} inquiry.\nEmail: ${data.email}\nPhone: ${data.phone}\nPreferred contact: ${data.preferredContactMethod}\nState: ${data.state || "Not provided"}\nMessage: ${data.message || "None"}` });
+      const delivery = await resend.emails.send({ from: process.env.EMAIL_FROM || "Leads <onboarding@resend.dev>", to: process.env.NOTIFICATION_EMAIL, subject: `New Coverage Inquiry | TMF Insurance Group — ${data.fullName}`, text: `TMF Insurance Group received a ${data.coverageInterest} inquiry from ${data.fullName}.\nEmail: ${data.email}\nPhone: ${data.phone}\nPreferred contact: ${data.preferredContactMethod}\nState: ${data.state || "Not provided"}\nMessage: ${data.message || "None"}` });
       if (delivery.error) {
         console.error("Lead saved but advisor notification failed", { leadId: lead.id, error: delivery.error });
-        return NextResponse.json({ error: "Your request was saved, but we could not notify the advisor. Please contact the advisor directly." }, { status: 502 });
+        return NextResponse.json({ error: "Your request was saved, but we could not notify TMF Insurance Group. Please contact the team directly." }, { status: 502 });
       }
     }
     return NextResponse.json({ ok: true, leadId: lead.id }, { status: 201 });
   } catch (error) {
     console.error("Lead submission failed", error);
-    return NextResponse.json({ error: "We could not save your request. Please contact the advisor directly." }, { status: 500 });
+    return NextResponse.json({ error: "We could not save your request. Please contact TMF Insurance Group directly." }, { status: 500 });
   }
 }
