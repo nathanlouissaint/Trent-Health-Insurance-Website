@@ -1,1 +1,10 @@
-import type { MetadataRoute } from "next"; export default function sitemap():MetadataRoute.Sitemap{const pages=["","/services","/about","/resources","/contact","/book","/privacy","/terms"];return pages.map((page)=>({url:`https://example.com${page}`,lastModified:new Date()}))}
+import type { MetadataRoute } from "next";
+import { getSiteUrlForPath } from "@/lib/site-url";
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const pages = ["", "/apply", "/services", "/about", "/resources", "/contact", "/book", "/privacy", "/terms"];
+  return pages.flatMap((page) => {
+    const url = getSiteUrlForPath(page || "/");
+    return url ? [{ url, lastModified: new Date() }] : [];
+  });
+}
