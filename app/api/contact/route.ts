@@ -110,10 +110,10 @@ function emailHtml(data: z.infer<typeof contactSchema>, submittedAt: Date) {
   ];
 
   return `<!doctype html>
-<html><body style="margin:0;background:#f5f8fc;font-family:Arial,sans-serif;color:#1d2939">
+<html><body style="margin:0;background:#fcf6e9;font-family:Arial,sans-serif;color:#052d20">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="padding:32px 16px"><tr><td align="center">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:620px;background:#ffffff;border-radius:16px;overflow:hidden">
-      <tr><td style="background:#1f5f9e;padding:28px 32px;color:#ffffff"><div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Trent Advisor</div><h1 style="margin:8px 0 0;font-size:28px;line-height:1.2">New Coverage Inquiry</h1></td></tr>
+      <tr><td style="background:#052d20;padding:28px 32px;color:#ffffff"><div style="font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#d6b15a">TMF Insurance Group</div><h1 style="margin:8px 0 0;font-size:28px;line-height:1.2">New Coverage Inquiry</h1></td></tr>
       <tr><td style="padding:28px 32px"><p style="margin:0 0 20px;line-height:1.5">A visitor has submitted a general coverage inquiry.</p>
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">${rows.map(([label, value]) => `<tr><td style="padding:10px 0;border-top:1px solid #e7edf4;width:42%;font-size:13px;font-weight:700;color:#475467;vertical-align:top">${escapeHtml(label)}</td><td style="padding:10px 0;border-top:1px solid #e7edf4;font-size:14px;line-height:1.5;white-space:pre-wrap">${escapeHtml(value)}</td></tr>`).join("")}</table>
       </td></tr>
@@ -124,7 +124,7 @@ function emailHtml(data: z.infer<typeof contactSchema>, submittedAt: Date) {
 
 function emailText(data: z.infer<typeof contactSchema>, submittedAt: Date) {
   return [
-    "New Coverage Inquiry | Trent Health Insurance",
+    "New Coverage Inquiry | TMF Insurance Group",
     "",
     `Full name: ${data.fullName}`,
     `Email: ${data.email}`,
@@ -188,16 +188,17 @@ export async function POST(request: NextRequest) {
   }
 
   const submittedAt = new Date();
+  const submissionKey = confirmationKey(parsed.data);
   const resend = new Resend(apiKey);
   try {
     const result = await resend.emails.send({
       from,
       to,
       replyTo: parsed.data.email,
-      subject: "New Coverage Inquiry | Trent Health Insurance",
+      subject: "New Coverage Inquiry | TMF Insurance Group",
       html: emailHtml(parsed.data, submittedAt),
       text: emailText(parsed.data, submittedAt),
-    });
+    }, { idempotencyKey: `contact-advisor-${submissionKey}` });
 
     if (result.error) {
       console.error("Resend email delivery returned an error", resendDiagnostic(result.error));
@@ -221,7 +222,7 @@ export async function POST(request: NextRequest) {
     logConfirmationDiagnostic("skipped", { reason: "testing_sender_requires_development_test_mode", attempted: false });
     console.error("Applicant confirmation skipped: a verified custom sender domain is required.");
   } else {
-    const key = confirmationKey(parsed.data);
+    const key = submissionKey;
     if (!reserveConfirmation(key)) {
       logConfirmationDiagnostic("skipped", { reason: "duplicate_submission", attempted: false });
     } else {
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
         const confirmation = await resend.emails.send({
           from,
           to: confirmationTestMode ? to : parsed.data.email,
-          subject: "We've Received Your Coverage Inquiry | Trent Advisor",
+          subject: "We've Received Your Coverage Inquiry | TMF Insurance Group",
           html: confirmationEmail.html,
           text: confirmationEmail.text,
         }, { idempotencyKey: `contact-confirmation-${key}` });

@@ -1,4 +1,4 @@
-# [Advisor Name] — Health Coverage Advisory Website
+# TMF Insurance Group Website
 
 A Next.js 15 / TypeScript portfolio and lead-generation site for a health insurance advisor. This project deliberately uses placeholders where the client has not provided verified business information.
 
@@ -22,7 +22,7 @@ Use `npm run typecheck` and `npm run build` before release.
 To test the applicant confirmation while using Resend's `onboarding@resend.dev` sender, set these values in `.env.local` and run `npm run dev`:
 
 ```bash
-RESEND_FROM_EMAIL="Trent Advisor <onboarding@resend.dev>"
+RESEND_FROM_EMAIL="TMF Insurance Group <onboarding@resend.dev>"
 CONTACT_NOTIFICATION_EMAIL="your-authorized-resend-account-email@example.com"
 ENABLE_APPLICANT_CONFIRMATION="false"
 APPLICANT_CONFIRMATION_TEST_MODE="true"
@@ -40,10 +40,10 @@ The form intentionally does not request medical or other sensitive health inform
 
 The app is Vercel and Render compatible.
 
-- Configure `DATABASE_URL`, `RESEND_API_KEY`, `NOTIFICATION_EMAIL`, and a verified `EMAIL_FROM` domain in the host dashboard.
-- Run Prisma migrations as a release step, then deploy with `npm run build`.
-- Add the actual `NEXT_PUBLIC_CALENDLY_URL` after the booking page and availability are verified.
-- Replace `https://example.com` in `app/layout.tsx`, `app/sitemap.ts`, and `app/robots.ts` with the production domain.
+- Configure `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, and `CONTACT_NOTIFICATION_EMAIL` in the host dashboard for the active contact and application funnel. Set `ENABLE_APPLICANT_CONFIRMATION=true` only after the sender domain is verified in Resend.
+- Configure `NEXT_PUBLIC_SITE_URL` with the verified production domain. It supplies metadata, sitemap, and robots URLs; these URLs stay unset until it is provided.
+- `DATABASE_URL`, `NOTIFICATION_EMAIL`, and `EMAIL_FROM` are only required if the separate legacy `/api/leads` endpoint is enabled. Do not run Prisma migrations for the `/apply` funnel.
+- Verify the existing Calendly destination before launch. `NEXT_PUBLIC_CALENDLY_URL` is reserved for a future configurable booking link.
 - Add a shared production rate limiter and bot-protection service before taking public submissions.
 
 ## Required pre-launch approvals
